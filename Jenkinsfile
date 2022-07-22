@@ -41,6 +41,15 @@ pipeline {
             steps{
                 input 'Deploy to Production?'
                 milestone(1)
+                withCredentials([usernamePassword(credentialsId: 'webserver_login', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                  // available as an env variable, but will be masked if you try to print it out any which way
+                  // note: single quotes prevent Groovy interpolation; expansion is by Bourne Shell, which is what you want
+                  sh '1. echo $PASSWORD'
+                  // also available as a Groovy variable
+                  echo USERNAME
+                  // or inside double quotes for string interpolation
+                  echo "2. username is $USERNAME"
+                }
                 withCredentials ([usernamePassword(credentiaslId: 'webserver_login', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD' )]){
                     script{
                         echo "sshpass -p '$PASSWORD' -v ssh -o StrictHostKeyChecking=no $USERNAME@${env.prod_id} \"docker pull nachocardona/train-schedule:${env.BUILD_NUMBER}\" "
